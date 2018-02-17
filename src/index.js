@@ -3,11 +3,16 @@ import devtools from 'hyperapp-redux-devtools';
 
 import './index.css';
 
-const state = {};
+const state = {
+  todos: [
+    { description: 'buy some milk', completed: true },
+    { description: 'empty bins', completed: false },
+  ],
+};
 
 const actions = {};
 
-const view = () => (
+const view = state => (
   <section class="todoapp">
     <div>
       <header class="header">
@@ -16,32 +21,7 @@ const view = () => (
       </header>
       <section class="main">
         <input class="toggle-all" />
-        <ul class="todo-list">
-          <li class="">
-            <div class="view">
-              <input class="toggle" type="checkbox" />
-              <label>eins</label>
-              <button class="destroy" />
-            </div>
-            <input class="edit" value="eins" />
-          </li>
-          <li class="completed">
-            <div class="view">
-              <input class="toggle" type="checkbox" />
-              <label>zwei</label>
-              <button class="destroy" />
-            </div>
-            <input class="edit" value="zwei" />
-          </li>
-          <li class="">
-            <div class="view">
-              <input class="toggle" type="checkbox" />
-              <label>drei</label>
-              <button class="destroy" />
-            </div>
-            <input class="edit" value="drei" />
-          </li>
-        </ul>
+        <ul class="todo-list">{state.todos.map(todo => <Todo {...todo} />)}</ul>
       </section>
       <footer class="footer">
         <span class="todo-count">
@@ -73,6 +53,17 @@ const view = () => (
       </footer>
     </div>
   </section>
+);
+
+const Todo = ({ id, completed, description }) => (
+  <li class={completed ? 'completed' : ''}>
+    <div class="view">
+      <input class="toggle" type="checkbox" checked={completed} />
+      <label>{description}</label>
+      <button class="destroy" />
+    </div>
+    <input class="edit" value={description} />
+  </li>
 );
 
 devtools(app)(state, actions, view, document.body);

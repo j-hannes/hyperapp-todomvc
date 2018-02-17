@@ -9,6 +9,7 @@
     "build": "parcel build src/index.html --public-url ./src"
   },
   "dependencies": {
+    "@hyperapp/router": "~0.4.1",
     "hyperapp": "~1.1.2"
   },
   "devDependencies": {

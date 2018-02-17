@@ -1,7 +1,14 @@
 import { h, app } from 'hyperapp';
 import devtools from 'hyperapp-redux-devtools';
+import { Link, location } from '@hyperapp/router';
 
 import './index.css';
+
+const routes = {
+  ROOT: '/',
+  ACTIVE: '/active',
+  COMPLETED: '/completed',
+};
 
 const state = {
   todos: [
@@ -11,6 +18,7 @@ const state = {
   nextId: 3,
   todoInput: '',
   editing: null,
+  location: location.state,
 };
 
 const actions = {
@@ -45,6 +53,7 @@ const actions = {
     ),
   }),
   finishEditing: () => ({ editing: null }),
+  location: location.actions,
 };
 
 const view = (state, actions) => (
@@ -63,7 +72,7 @@ const view = (state, actions) => (
       <section class="main">
         <input class="toggle-all" />
         <ul class="todo-list">
-          {state.todos.map(todo => (
+          {filterTodos(state.location, state.todos).map(todo => (
             <Todo
               {...todo}
               actions={actions}
@@ -74,25 +83,7 @@ const view = (state, actions) => (
       </section>
       <footer class="footer">
         <TodoCount todos={state.todos} />
-        <ul class="filters">
-          <li>
-            <a href="#/" class="selected">
-              All
-            </a>
-          </li>
-          <span> </span>
-          <li>
-            <a href="#/active" class="">
-              Active
-            </a>
-          </li>
-          <span> </span>
-          <li>
-            <a href="#/completed" class="">
-              Completed
-            </a>
-          </li>
-        </ul>
+        <TodoFilter location={state.location} />
         <button class="clear-completed" onclick={actions.clearCompleted}>
           Clear completed
         </button>
@@ -135,4 +126,45 @@ const TodoCount = ({ todos }) => {
   );
 };
 
-devtools(app)(state, actions, view, document.body);
+const filterTodos = (location, todos) => {
+  switch (location.pathname) {
+    case '/active':
+      return todos.filter(({ completed }) => !completed);
+    case '/completed':
+      return todos.filter(({ completed }) => completed);
+    default:
+      return todos;
+  }
+};
+
+const TodoFilter = ({ location }) => (
+  <ul class="filters">
+    {[
+      {
+        path: routes.ROOT,
+        name: 'All',
+      },
+      {
+        path: routes.ACTIVE,
+        name: 'Active',
+      },
+      {
+        path: routes.COMPLETED,
+        name: 'Completed',
+      },
+    ].map(filter => (
+      <li>
+        <Link
+          to={filter.path}
+          class={filter.path === location.pathname ? 'selected' : ''}
+        >
+          {filter.name}
+        </Link>
+      </li>
+    ))}
+  </ul>
+);
+
+const main = devtools(app)(state, actions, view, document.body);
+
+const unsubscribe = location.subscribe(main.location);

@@ -27,6 +27,9 @@ const actions = {
     nextId: state.nextId + 1,
     todoInput: '',
   }),
+  remove: id => state => ({
+    todos: state.todos.filter(todo => todo.id !== id),
+  }),
 };
 
 const view = (state, actions) => (
@@ -45,7 +48,9 @@ const view = (state, actions) => (
       <section class="main">
         <input class="toggle-all" />
         <ul class="todo-list">
-          {state.todos.map(todo => <Todo {...todo} toggle={actions.toggle} />)}
+          {state.todos.map(todo => (
+            <Todo {...todo} toggle={actions.toggle} remove={actions.remove} />
+          ))}
         </ul>
       </section>
       <footer class="footer">
@@ -80,7 +85,7 @@ const view = (state, actions) => (
   </section>
 );
 
-const Todo = ({ id, completed, description, toggle }) => (
+const Todo = ({ id, completed, description, toggle, remove }) => (
   <li class={completed ? 'completed' : ''}>
     <div class="view">
       <input
@@ -90,7 +95,7 @@ const Todo = ({ id, completed, description, toggle }) => (
         onclick={e => toggle(id)}
       />
       <label>{description}</label>
-      <button class="destroy" />
+      <button class="destroy" onclick={e => remove(id)} />
     </div>
     <input class="edit" value={description} />
   </li>

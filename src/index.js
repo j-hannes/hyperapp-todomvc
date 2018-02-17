@@ -11,17 +11,15 @@ const routes = {
 };
 
 const state = {
-  todos: [
-    { id: 1, description: 'buy some milk', completed: true },
-    { id: 2, description: 'empty bins', completed: false },
-  ],
-  nextId: 3,
+  todos: [],
+  nextId: 1,
   todoInput: '',
   editing: null,
   location: location.state,
 };
 
 const actions = {
+  location: location.actions,
   toggle: id => state => ({
     todos: state.todos.map(
       todo => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)
@@ -53,7 +51,9 @@ const actions = {
     ),
   }),
   finishEditing: () => ({ editing: null }),
-  location: location.actions,
+  toggleAll: checked => state => ({
+    todos: state.todos.map(todo => ({ ...todo, completed: checked })),
+  }),
 };
 
 const view = (state, actions) => (
@@ -61,25 +61,20 @@ const view = (state, actions) => (
     <div>
       <header class="header">
         <h1>todos</h1>
-        <input
-          class="new-todo"
-          placeholder="What needs to be done?"
-          value={state.todoInput}
-          oninput={e => actions.updateNewTodo(e.target.value)}
-          onkeyup={e => (e.which === 13 ? actions.addTodo() : null)}
-        />
+        <NewTodo inputValue={state.todoInput} actions={actions} />
       </header>
       <section class="main">
-        <input class="toggle-all" />
-        <ul class="todo-list">
-          {filterTodos(state.location, state.todos).map(todo => (
-            <Todo
-              {...todo}
-              actions={actions}
-              editing={todo.id === state.editing}
-            />
-          ))}
-        </ul>
+        <input
+          class="toggle-all"
+          type="checkbox"
+          onclick={e => actions.toggleAll(e.target.checked)}
+        />
+        <TodoList
+          location={state.location}
+          todos={state.todos}
+          editing={state.editing}
+          actions={actions}
+        />
       </section>
       <footer class="footer">
         <TodoCount todos={state.todos} />
@@ -91,6 +86,35 @@ const view = (state, actions) => (
     </div>
   </section>
 );
+
+const NewTodo = ({ inputValue, actions }) => (
+  <input
+    class="new-todo"
+    placeholder="What needs to be done?"
+    value={inputValue}
+    oninput={e => actions.updateNewTodo(e.target.value)}
+    onkeyup={e => (e.which === 13 ? actions.addTodo() : null)}
+  />
+);
+
+const TodoList = ({ location, todos, editing, actions }) => (
+  <ul class="todo-list">
+    {filterTodos(location, todos).map(todo => (
+      <Todo {...todo} actions={actions} editing={todo.id === state.editing} />
+    ))}
+  </ul>
+);
+
+const filterTodos = (location, todos) => {
+  switch (location.pathname) {
+    case '/active':
+      return todos.filter(({ completed }) => !completed);
+    case '/completed':
+      return todos.filter(({ completed }) => completed);
+    default:
+      return todos;
+  }
+};
 
 const Todo = ({ id, completed, description, editing, actions }) => (
   <li class={`${completed ? 'completed' : ''} ${editing ? 'editing' : ''}`}>
@@ -124,17 +148,6 @@ const TodoCount = ({ todos }) => {
       <span> left</span>
     </span>
   );
-};
-
-const filterTodos = (location, todos) => {
-  switch (location.pathname) {
-    case '/active':
-      return todos.filter(({ completed }) => !completed);
-    case '/completed':
-      return todos.filter(({ completed }) => completed);
-    default:
-      return todos;
-  }
 };
 
 const TodoFilter = ({ location }) => (

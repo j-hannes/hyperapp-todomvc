@@ -5,14 +5,20 @@ import './index.css';
 
 const state = {
   todos: [
-    { description: 'buy some milk', completed: true },
-    { description: 'empty bins', completed: false },
+    { id: 1, description: 'buy some milk', completed: true },
+    { id: 2, description: 'empty bins', completed: false },
   ],
 };
 
-const actions = {};
+const actions = {
+  toggle: id => state => ({
+    todos: state.todos.map(
+      todo => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)
+    ),
+  }),
+};
 
-const view = state => (
+const view = (state, actions) => (
   <section class="todoapp">
     <div>
       <header class="header">
@@ -21,7 +27,9 @@ const view = state => (
       </header>
       <section class="main">
         <input class="toggle-all" />
-        <ul class="todo-list">{state.todos.map(todo => <Todo {...todo} />)}</ul>
+        <ul class="todo-list">
+          {state.todos.map(todo => <Todo {...todo} toggle={actions.toggle} />)}
+        </ul>
       </section>
       <footer class="footer">
         <span class="todo-count">
@@ -55,10 +63,15 @@ const view = state => (
   </section>
 );
 
-const Todo = ({ id, completed, description }) => (
+const Todo = ({ id, completed, description, toggle }) => (
   <li class={completed ? 'completed' : ''}>
     <div class="view">
-      <input class="toggle" type="checkbox" checked={completed} />
+      <input
+        class="toggle"
+        type="checkbox"
+        checked={completed}
+        onclick={e => toggle(id)}
+      />
       <label>{description}</label>
       <button class="destroy" />
     </div>

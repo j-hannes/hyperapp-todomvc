@@ -10,6 +10,7 @@ const state = {
   ],
   nextId: 3,
   todoInput: '',
+  editing: null,
 };
 
 const actions = {
@@ -33,6 +34,17 @@ const actions = {
   clearCompleted: () => state => ({
     todos: state.todos.filter(todo => !todo.completed),
   }),
+  setEditing: editing => {
+    const el = document.getElementById(`todo-${editing}`);
+    setTimeout(() => el.focus(), 100);
+    return { editing };
+  },
+  updateTodo: ({ id, description }) => state => ({
+    todos: state.todos.map(
+      todo => (todo.id === id ? { ...todo, description } : todo)
+    ),
+  }),
+  finishEditing: () => ({ editing: null }),
 };
 
 const view = (state, actions) => (
@@ -52,7 +64,11 @@ const view = (state, actions) => (
         <input class="toggle-all" />
         <ul class="todo-list">
           {state.todos.map(todo => (
-            <Todo {...todo} toggle={actions.toggle} remove={actions.remove} />
+            <Todo
+              {...todo}
+              actions={actions}
+              editing={todo.id === state.editing}
+            />
           ))}
         </ul>
       </section>
@@ -85,19 +101,25 @@ const view = (state, actions) => (
   </section>
 );
 
-const Todo = ({ id, completed, description, toggle, remove }) => (
-  <li class={completed ? 'completed' : ''}>
+const Todo = ({ id, completed, description, editing, actions }) => (
+  <li class={`${completed ? 'completed' : ''} ${editing ? 'editing' : ''}`}>
     <div class="view">
       <input
         class="toggle"
         type="checkbox"
         checked={completed}
-        onclick={e => toggle(id)}
+        onclick={e => actions.toggle(id)}
       />
-      <label>{description}</label>
-      <button class="destroy" onclick={e => remove(id)} />
+      <label ondblclick={e => actions.setEditing(id)}>{description}</label>
+      <button class="destroy" onclick={e => actions.remove(id)} />
     </div>
-    <input class="edit" value={description} />
+    <input
+      id={`todo-${id}`}
+      class="edit"
+      value={description}
+      oninput={e => actions.updateTodo({ id, description: e.target.value })}
+      onblur={e => actions.finishEditing()}
+    />
   </li>
 );
 

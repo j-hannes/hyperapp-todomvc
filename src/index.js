@@ -54,12 +54,7 @@ const view = (state, actions) => (
         </ul>
       </section>
       <footer class="footer">
-        <span class="todo-count">
-          <strong>2</strong>
-          <span> </span>
-          <span>items</span>
-          <span> left</span>
-        </span>
+        <TodoCount todos={state.todos} />
         <ul class="filters">
           <li>
             <a href="#/" class="selected">
@@ -100,5 +95,17 @@ const Todo = ({ id, completed, description, toggle, remove }) => (
     <input class="edit" value={description} />
   </li>
 );
+
+const TodoCount = ({ todos }) => {
+  const todoCount = todos.filter(todo => !todo.completed).length;
+  return (
+    <span class="todo-count">
+      <strong>{todoCount}</strong>
+      <span> </span>
+      <span>{todoCount === 1 ? 'item' : 'items'}</span>
+      <span> left</span>
+    </span>
+  );
+};
 
 devtools(app)(state, actions, view, document.body);

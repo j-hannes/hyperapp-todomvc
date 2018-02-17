@@ -30,6 +30,9 @@ const actions = {
   remove: id => state => ({
     todos: state.todos.filter(todo => todo.id !== id),
   }),
+  clearCompleted: () => state => ({
+    todos: state.todos.filter(todo => !todo.completed),
+  }),
 };
 
 const view = (state, actions) => (
@@ -74,7 +77,9 @@ const view = (state, actions) => (
             </a>
           </li>
         </ul>
-        <button class="clear-completed">Clear completed</button>
+        <button class="clear-completed" onclick={actions.clearCompleted}>
+          Clear completed
+        </button>
       </footer>
     </div>
   </section>
